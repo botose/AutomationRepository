@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @BasePathAwareController
 @RestController
 @RequestMapping(value = "/localRepo")
-public class GitRepositoryFilesController extends ResourceProcessor<Resource<ScenarioFile>>, ResourceAssembler<ScenarioFile, Resource<ScenarioFile>> {
+public class ScenarioController extends ResourceProcessor<Resource<ScenarioFile>>, ResourceAssembler<ScenarioFile, Resource<ScenarioFile>> {
 
     @Autowired
     GitRepositoryStore gitRepositoryStore;
