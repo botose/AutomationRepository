@@ -1,33 +1,25 @@
 package com.automation.server.repository;
 
-import org.eclipse.jgit.api.AddCommand;
-import org.eclipse.jgit.api.CommitCommand;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.PushCommand;
+import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.CredentialsProvider;
-import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URISyntaxException;
-import java.util.Collection;
-
 
 public class GitRepositoryAdapter implements GitRepository {
-    private String remoteUrl;
     private String localPath;
+    private String remoteUrl;
     private Repository repository;
     private Git git;
     private CredentialsProvider creditentialsProvider;
 
     public GitRepositoryAdapter(String localPath, String userName, String password) {
         this.localPath = localPath;
-        creditentialsProvider = new UsernamePasswordCredentialsProvider(userName, password);
+        this.creditentialsProvider = new UsernamePasswordCredentialsProvider(userName, password);
     }
 
     @Override
@@ -37,7 +29,15 @@ public class GitRepositoryAdapter implements GitRepository {
     }
 
     @Override
-    public void open() throws IOException {
+    public void open(String userName, String password) throws IOException, GitExecutionException {
+        creditentialsProvider = new UsernamePasswordCredentialsProvider(userName, password);
+        try {
+            pull();
+        } catch (GitAPIException e) {
+            e.printStackTrace();
+            throw new GitExecutionException("Exception when executing 'open'. Remote URL: " +
+                    remoteUrl + ", local path:" + localPath, e);
+        }
         repository = new FileRepositoryBuilder()
                 .setGitDir(new File(localPath))
                 .build();
@@ -45,13 +45,10 @@ public class GitRepositoryAdapter implements GitRepository {
     }
 
     @Override
-    public String getLocalPath() {
-        return localPath;
-    }
-
-    @Override
     public void close() {
+        git.close();
         repository.close();
+        creditentialsProvider = null;
     }
 
     @Override
@@ -62,18 +59,16 @@ public class GitRepositoryAdapter implements GitRepository {
     @Override
     public void clone(String remoteRepositoryUrl) throws URISyntaxException, IOException, GitExecutionException {
         remoteUrl = remoteRepositoryUrl;
-        open();
-        git.remoteSetUrl().setUri(new URIish(remoteUrl));
         try {
-            Collection<Ref> remoteRefs = git.lsRemote()
+            git = Git.cloneRepository()
+                    .setURI(remoteUrl)
+                    .setDirectory(new File(localPath))
                     .setCredentialsProvider(creditentialsProvider)
-                    .setRemote("origin")
-                    .setTags(true)
-                    .setHeads(false)
                     .call();
+            repository = git.getRepository();
         } catch (GitAPIException e) {
             e.printStackTrace();
-            throw new GitExecutionException("Exception when executing 'clone'. Remote URL: " + remoteRepositoryUrl, e);
+            throw new GitExecutionException("Exception when executing 'clone'. Remote URL: " + remoteUrl, e);
         }
     }
 
@@ -107,7 +102,7 @@ public class GitRepositoryAdapter implements GitRepository {
 
     @Override
     public void push() throws GitExecutionException {
-        PushCommand push = git.push();
+        PushCommand push = git.push().setCredentialsProvider(creditentialsProvider);
         try {
             push.call();
         } catch (GitAPIException e) {
@@ -120,15 +115,23 @@ public class GitRepositoryAdapter implements GitRepository {
         return remoteUrl;
     }
 
-    public Repository getRepository() {
-        return repository;
+    public String getLocalPath() {
+        return localPath;
     }
 
-    public Git getGit() {
-        return git;
+    private void pull() throws GitAPIException {
+        PullCommand pull = git.pull().setCredentialsProvider(creditentialsProvider);
+        pull.call();
     }
 
-    public CredentialsProvider getCreditentialsProvider() {
-        return creditentialsProvider;
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+        stream.writeObject(remoteUrl);
+        stream.writeObject(localPath);
+    }
+
+    private void readObject(ObjectInputStream stream)
+            throws IOException, ClassNotFoundException {
+        this.remoteUrl = (String) stream.readObject();
+        this.localPath = (String) stream.readObject();
     }
 }

@@ -1,11 +1,12 @@
 package com.automation.server.repository;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URISyntaxException;
 
-public interface GitRepository {
+public interface GitRepository extends Serializable{
     void create() throws IOException;
-    void open() throws IOException;
+    void open(String userName, String password) throws IOException, GitExecutionException;
     String getLocalPath();
     void close();
     void addRemoteRepository(String remoteUrl);
