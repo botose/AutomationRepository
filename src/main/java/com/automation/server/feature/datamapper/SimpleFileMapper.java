@@ -2,7 +2,7 @@ package com.automation.server.feature.datamapper;
 
 
 import com.automation.server.feature.Scenario;
-import com.automation.server.feature.ScenarioFile;
+import com.automation.server.feature.FeatureFile;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
@@ -15,8 +15,8 @@ import java.util.List;
 
 @Component("SimpleFileMapper")
 public class SimpleFileMapper implements FileMapper {
-    public ScenarioFile map(Path filePath, Charset charset) {
-        ScenarioFile scenarioFile = new ScenarioFile(filePath.getFileName().toString());
+    public FeatureFile map(Path filePath, Charset charset) {
+        FeatureFile featureFile = new FeatureFile(filePath.getFileName().toString());
         try (BufferedReader reader = Files.newBufferedReader(filePath, charset)) {
             String line;
             int stage = 0;
@@ -26,14 +26,14 @@ public class SimpleFileMapper implements FileMapper {
             while ((line = reader.readLine()) != null) {
                 switch(stage) {
                     case 0:
-                        scenarioFile.setTitle(line);
+                        featureFile.setTitle(line);
                         stage++;
                         break;
                     case 1:
                         if (!line.equals("")) {
                             lines.add(line);
                         } else {
-                            scenarioFile.setDescription(new ArrayList<>(lines));
+                            featureFile.setDescription(new ArrayList<>(lines));
                             lines.clear();
                             stage++;
                         }
@@ -60,11 +60,11 @@ public class SimpleFileMapper implements FileMapper {
                         break;
                 }
             }
-            scenarioFile.setScenarios(scenarios);
+            featureFile.setScenarios(scenarios);
         } catch (IOException x) {
             System.err.format("IOException: %s%n", x);
         }
 
-        return scenarioFile;
+        return featureFile;
     }
 }

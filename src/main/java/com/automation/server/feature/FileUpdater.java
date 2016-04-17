@@ -14,7 +14,7 @@ public class FileUpdater {
 
     public static final String SEPARATOR_LINE = "";
 
-    public void updateFile(String path, ScenarioFile feature, Charset charset) {
+    public void updateFile(String path, FeatureFile feature, Charset charset) {
         try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(path), charset))
         {
             writeLine(feature.getTitle(), writer);
