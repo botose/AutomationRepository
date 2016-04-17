@@ -18,7 +18,27 @@ public class FileDataMapper {
             int stage = 0;
             while ((line = reader.readLine()) != null) {
                 switch(stage) {
-                    case
+                    case 0:
+                        if (structure.getTitlePattern().matcher(line.trim()).lookingAt()) {
+                            stage++;
+                        } else {
+
+                        }
+                        break;
+                    case 1:
+                        if (structure.get().matcher(line.trim()).lookingAt()) {
+                            stage++;
+                        } else {
+
+                        }
+                        break;
+                    case 2:
+                        if (structure.getTitlePattern().matcher(line.trim()).lookingAt()) {
+                            stage--;
+                        } else {
+
+                        }
+                        break;
                 }
                 line = line.trim();
             }

@@ -6,7 +6,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class ScenarioFile {
-    private List<String> headline;
+    private String title;
+    private List<String> description;
     private List<Scenario> scenarios;
     private String filePath;
     private static final Charset CHARSET = StandardCharsets.UTF_8;
@@ -23,12 +24,12 @@ public class ScenarioFile {
 
     }
 
-    public List<String> getHeadline() {
-        return headline;
+    public List<String> getDescription() {
+        return description;
     }
 
-    public void setHeadline(List<String> headline) {
-        this.headline = headline;
+    public void setDescription(List<String> description) {
+        this.description = description;
     }
 
     public List<Scenario> getScenarios() {
@@ -37,5 +38,13 @@ public class ScenarioFile {
 
     public void setScenarios(List<Scenario> scenarios) {
         this.scenarios = scenarios;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 }

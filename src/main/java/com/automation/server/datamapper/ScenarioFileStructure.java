@@ -5,5 +5,6 @@ import java.util.regex.Pattern;
 public interface ScenarioFileStructure {
     Pattern getTitlePattern();
     Pattern getStepPattern();
+    Pattern getDescriptionPattern();
     Pattern getAnnotationPattern();
 }
