@@ -9,6 +9,8 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import java.io.*;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GitRepositoryAdapter implements GitRepository {
     private String localPath;

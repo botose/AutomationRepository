@@ -1,27 +1,16 @@
-package com.automation.server.model;
+package com.automation.server.feature;
 
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class ScenarioFile {
     private String title;
     private List<String> description;
     private List<Scenario> scenarios;
-    private String filePath;
-    private static final Charset CHARSET = StandardCharsets.UTF_8;
+    private String fileName;
 
-    public ScenarioFile(String filePath) {
-
-    }
-
-    public void readFile() {
-
-    }
-
-    public void writeFile() {
-
+    public ScenarioFile(String fileName) {
+        this.fileName = fileName;
     }
 
     public List<String> getDescription() {

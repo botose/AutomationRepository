@@ -4,6 +4,7 @@ import com.automation.server.repository.GitExecutionException;
 import com.automation.server.repository.GitRepository;
 import com.automation.server.repository.GitRepositoryStore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.data.rest.webmvc.BasePathAwareController;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceAssembler;
@@ -20,8 +21,7 @@ import java.net.URISyntaxException;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
-@BasePathAwareController
-@RestController
+@RepositoryRestResource
 @RequestMapping(value = "/repositories")
 public class GitRepositoryConnectionController implements ResourceProcessor<Resource<GitRepository>>, ResourceAssembler<GitRepository, Resource<GitRepository>> {
     @Autowired
