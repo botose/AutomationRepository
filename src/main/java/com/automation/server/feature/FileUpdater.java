@@ -12,7 +12,7 @@ import java.util.List;
 @Component("FileUpdater")
 public class FileUpdater {
 
-    public static final String SEPARATOR_LINE = "";
+    public static final String NEW_LINE = "\n";
 
     public void updateFile(String path, FeatureFile feature, Charset charset) {
         try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(path), charset))
@@ -24,6 +24,7 @@ public class FileUpdater {
             for(Scenario scenario : feature.getScenarios()) {
                 writeLine(scenario.getTitle(), writer);
                 writeLines(scenario.getContent(), writer);
+                writeEmptyLine(writer);
             }
 
         } catch (IOException x) {
@@ -32,12 +33,13 @@ public class FileUpdater {
     }
 
     private void writeEmptyLine(BufferedWriter writer) throws IOException {
-        writer.write(SEPARATOR_LINE, 0, SEPARATOR_LINE.length());
+        writer.write(NEW_LINE, 0, NEW_LINE.length());
     }
 
     private void writeLine(String line, BufferedWriter writer) throws IOException {
         if(!line.equals("")) {
-            writer.write(line, 0, line.length());
+            writer.write(line + NEW_LINE, 0, line.length());
+            System.out.print(line + NEW_LINE);
         }
     }
 

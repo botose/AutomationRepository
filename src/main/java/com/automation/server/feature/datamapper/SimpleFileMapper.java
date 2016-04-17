@@ -30,7 +30,7 @@ public class SimpleFileMapper implements FileMapper {
                         stage++;
                         break;
                     case 1:
-                        if (!line.equals("")) {
+                        if (!line.trim().equals("")) {
                             lines.add(line);
                         } else {
                             featureFile.setDescription(new ArrayList<>(lines));
@@ -39,14 +39,13 @@ public class SimpleFileMapper implements FileMapper {
                         }
                         break;
                     case 2:
-                        if(line.contains("Scenario Outline: ")) {
+                        if(line.trim().contains("Scenario:") || line.trim().contains("Scenario Outline:")) {
                             scenario.setTitle(line);
                             stage++;
                             break;
                         }
-                        stage++;
                     case 3:
-                        if (!line.equals("")) {
+                        if (!line.trim().equals("")) {
                             lines.add(line);
                         } else {
                             scenario.setContent(new ArrayList<>(lines));
@@ -59,6 +58,10 @@ public class SimpleFileMapper implements FileMapper {
                     default:
                         break;
                 }
+            }
+            if(lines.size() > 0) {
+                scenario.setContent(new ArrayList<>(lines));
+                scenarios.add(scenario);
             }
             featureFile.setScenarios(scenarios);
         } catch (IOException x) {

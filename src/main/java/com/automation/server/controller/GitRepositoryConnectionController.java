@@ -21,7 +21,7 @@ import java.net.URISyntaxException;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
-@RepositoryRestResource
+@BasePathAwareController
 @RequestMapping(value = "/repositories")
 public class GitRepositoryConnectionController implements ResourceProcessor<Resource<GitRepository>>, ResourceAssembler<GitRepository, Resource<GitRepository>> {
     @Autowired
@@ -29,8 +29,7 @@ public class GitRepositoryConnectionController implements ResourceProcessor<Reso
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<Resource<GitRepository>> openRepo(@RequestBody RepositoryData repositoryData) throws URISyntaxException, GitExecutionException, IOException {
-        GitRepository gitRepository = null;
-        gitRepository = repositories.openRepository(
+        GitRepository gitRepository = repositories.openRepository(
                 repositoryData.remoteRepositoryUrl,
                 repositoryData.userName,
                 repositoryData.password);
@@ -68,7 +67,7 @@ public class GitRepositoryConnectionController implements ResourceProcessor<Reso
 
     @Override
     public Resource<GitRepository> process(Resource<GitRepository> resource) {
-       resource.add(linkTo(GitRepositoryConnectionController.class).slash("upload").withRel("upload"));
+       resource.add(linkTo(GitRepositoryConnectionController.class).withSelfRel());
        return resource;
     }
 

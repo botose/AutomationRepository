@@ -13,6 +13,9 @@ public class GitRepositoryStore implements Serializable {
     static private GitRepositoryAdapter activeRepository;
 
     public GitRepositoryAdapter getActiveRepository() {
+        if(activeRepository == null) {
+            throw new IllegalStateException("No active Git repo, please open one first.");
+        }
         return activeRepository;
     }
 

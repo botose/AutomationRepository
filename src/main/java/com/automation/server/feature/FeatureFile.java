@@ -7,32 +7,38 @@ import java.util.List;
 
 public class FeatureFile {
     private String title;
+    private String fileName;
     private List<String> description;
     private List<Scenario> scenarios;
-    private String fileName;
 
     public FeatureFile(String fileName) {
         this.fileName = fileName;
+    }
+
+    public FeatureFile() {}
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public String getTitle() {
+        return title;
     }
 
     public List<String> getDescription() {
         return description;
     }
 
-    public void setDescription(List<String> description) {
-        this.description = description;
-    }
-
     public List<Scenario> getScenarios() {
         return scenarios;
     }
 
-    public void setScenarios(List<Scenario> scenarios) {
-        this.scenarios = scenarios;
+    public void setDescription(List<String> description) {
+        this.description = description;
     }
 
-    public String getTitle() {
-        return title;
+    public void setScenarios(List<Scenario> scenarios) {
+        this.scenarios = scenarios;
     }
 
     public void setTitle(String title) {
