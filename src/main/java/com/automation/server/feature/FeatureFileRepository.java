@@ -34,7 +34,6 @@ public class FeatureFileRepository {
         files = new HashMap<>();
         Files.walk(Paths.get(rootPath)).forEach(filePath -> {
             if (!filePath.toString().contains(".git") && Files.isRegularFile(filePath)) {
-                System.out.println(filePath);
                 files.put(filePath.toString(), featureFileBuilder.build(filePath, CHARSET));
             }
         });

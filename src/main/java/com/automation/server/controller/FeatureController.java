@@ -34,9 +34,20 @@ public class FeatureController implements ResourceProcessor<Resource<FeatureFile
         Map<String, FeatureFile> files;
         ifNoFilesLoadThem();
         files = featureFileRepository.getFiles();
-        System.out.println(files.values().toArray()[0]);
         Resources<FeatureFile> resources = new Resources<>(files.values());
 
+        resources.add(linkTo(FeatureController.class).withSelfRel());
+        resources.add(linkTo(FeatureController.class).slash("reloadFiles").withSelfRel());
+        return new ResponseEntity<>(resources, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "reloadFiles", method = RequestMethod.GET)
+    public ResponseEntity<Resources<FeatureFile>> reloadFiles() throws IOException {
+        String path = gitRepositoryStore.getActiveRepository().getLocalPath();
+        featureFileRepository.loadFiles(path);
+        Map<String, FeatureFile> files = featureFileRepository.getFiles();
+
+        Resources<FeatureFile> resources = new Resources<>(files.values());
         return new ResponseEntity<>(resources, HttpStatus.OK);
     }
 
@@ -74,6 +85,8 @@ public class FeatureController implements ResourceProcessor<Resource<FeatureFile
     public Resource<FeatureFile> process(Resource<FeatureFile> resource) {
         resource.add(linkTo(FeatureController.class).slash(resource.getContent().getFileName()).withSelfRel());
         resource.add(linkTo(FeatureController.class).slash("{featureFileName}").withSelfRel());
+        resource.add(linkTo(FeatureController.class).slash("reloadFiles").withSelfRel());
+        resource.add(linkTo(FeatureController.class).slash(resource.getContent().getFileName()).slash("scenarios").withSelfRel());
         return resource;
     }
 

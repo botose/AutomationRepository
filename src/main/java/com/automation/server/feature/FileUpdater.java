@@ -12,7 +12,7 @@ import java.util.List;
 @Component("FileUpdater")
 public class FileUpdater {
 
-    public static final String NEW_LINE = "\n";
+    public static final String NEW_LINE = "\r\n";
 
     public void updateFile(String path, FeatureFile feature, Charset charset) {
         try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(path), charset))
@@ -33,13 +33,13 @@ public class FileUpdater {
     }
 
     private void writeEmptyLine(BufferedWriter writer) throws IOException {
-        writer.write(NEW_LINE, 0, NEW_LINE.length());
+        writer.newLine();
     }
 
     private void writeLine(String line, BufferedWriter writer) throws IOException {
         if(!line.equals("")) {
-            writer.write(line + NEW_LINE, 0, line.length());
-            System.out.print(line + NEW_LINE);
+            writer.write(line, 0, line.length());
+            writer.newLine();
         }
     }
 

@@ -9,13 +9,9 @@ import org.springframework.data.rest.webmvc.BasePathAwareController;
 import org.springframework.hateoas.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.nio.file.NoSuchFileException;
 import java.util.List;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -33,13 +29,16 @@ public class ScenarioController implements ResourceProcessor<Resource<Scenario>>
 
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<Resources<Scenario>> getAll(@PathVariable String fileName) throws IOException {
+        ifNoFilesLoadThem();
         Resources<Scenario> resources = new Resources<>(featureFileRepository.getFile(fileName).getScenarios());
+
         return new ResponseEntity<>(resources, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/{scenarioTitle}", method = RequestMethod.GET)
+    @RequestMapping(value = "/search", method = RequestMethod.GET)
     public ResponseEntity<Resource<Scenario>> get(@PathVariable String fileName,
-                                  @PathVariable String scenarioTitle) throws NoSuchFileException {
+                                                  @RequestParam String scenarioTitle) throws IOException {
+        ifNoFilesLoadThem();
         List<Scenario> scenarios = featureFileRepository.getFile(fileName).getScenarios();
         Resource<Scenario> resource = null;
         for(Scenario scenario : scenarios) {
@@ -50,19 +49,21 @@ public class ScenarioController implements ResourceProcessor<Resource<Scenario>>
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/{scenarioTitle}", method = RequestMethod.POST)
+    @RequestMapping(value = "/search", method = RequestMethod.POST)
     public ResponseEntity<Resource<Scenario>> get(@PathVariable String fileName,
-                                  @PathVariable String scenarioTitle,
-                                  @RequestBody Scenario scenario) throws NoSuchFileException {
+                                                  @RequestParam String scenarioTitle,
+                                                  @RequestBody Scenario scenario) throws IOException {
+        ifNoFilesLoadThem();
         FeatureFile featureFile = featureFileRepository.getFile(fileName);
         featureFile.setScenario(scenarioTitle, scenario);
         featureFileRepository.updateFile(fileName);
         return new ResponseEntity<>(toResource(scenario), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/{scenarioTitle}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/search", method = RequestMethod.DELETE)
     public ResponseEntity<Resource<Scenario>> delete(@PathVariable String fileName,
-                                  @PathVariable String scenarioTitle) throws NoSuchFileException {
+                                                     @RequestParam String scenarioTitle) throws IOException {
+        ifNoFilesLoadThem();
         FeatureFile featureFile = featureFileRepository.getFile(fileName);
         featureFile.removeScenario(scenarioTitle);
         featureFileRepository.updateFile(fileName);
@@ -77,8 +78,14 @@ public class ScenarioController implements ResourceProcessor<Resource<Scenario>>
 
     @Override
     public Resource<Scenario> process(Resource<Scenario> resource) {
-        resource.add(linkTo(FeatureController.class).withSelfRel());
         return resource;
+    }
+
+    private void ifNoFilesLoadThem() throws IOException {
+        if(!featureFileRepository.hasFiles()) {
+            String path = gitRepositoryStore.getActiveRepository().getLocalPath();
+            featureFileRepository.loadFiles(path);
+        }
     }
 
 }

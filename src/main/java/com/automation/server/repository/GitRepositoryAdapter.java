@@ -2,10 +2,15 @@ package com.automation.server.repository;
 
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.diff.DiffFormatter;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 
 import java.io.*;
 import java.net.URISyntaxException;
@@ -111,6 +116,46 @@ public class GitRepositoryAdapter implements GitRepository {
             e.printStackTrace();
             throw new GitExecutionException("Exception when executing 'push'.", e);
         }
+    }
+
+    @Override
+    public List<String> getDiff(int numberOfCommit) throws IOException {
+        List<String> differences = new ArrayList<>();
+        ObjectReader reader = repository.newObjectReader();
+        CanonicalTreeParser oldTreeIter = new CanonicalTreeParser();
+
+        ObjectId oldTree = repository.resolve("HEAD~" + (numberOfCommit+1) + "^{tree}");
+        oldTreeIter.reset(reader, oldTree);
+
+        CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
+        ObjectId newTree;
+        if(numberOfCommit == 0) {
+            newTree = repository.resolve("HEAD^{tree}");
+        } else {
+            newTree = repository.resolve("HEAD~" + numberOfCommit + "^{tree}");
+        }
+        newTreeIter.reset( reader, newTree );
+
+        DiffFormatter df = new DiffFormatter(new ByteArrayOutputStream());
+        df.setRepository(repository);
+
+        List<DiffEntry> entries = df.scan(oldTreeIter, newTreeIter);
+
+        for(DiffEntry entry : entries) {
+            extractDifferenceFromEntry(differences, entry);
+        }
+        return differences;
+    }
+
+    private void extractDifferenceFromEntry(List<String> differences, DiffEntry entry) throws IOException {
+        differences.add(entry.toString());
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        DiffFormatter formatter = new DiffFormatter(byteArrayOutputStream);
+        formatter.setRepository(repository);
+        formatter.format(entry);
+        byteArrayOutputStream.close();
+        differences.add(byteArrayOutputStream.toString());
     }
 
     public String getRemoteUrl() {
