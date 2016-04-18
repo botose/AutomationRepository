@@ -4,6 +4,7 @@ import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
+import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Repository;
@@ -16,6 +17,7 @@ import java.io.*;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class GitRepositoryAdapter implements GitRepository {
     private String localPath;
@@ -38,6 +40,15 @@ public class GitRepositoryAdapter implements GitRepository {
     @Override
     public void open(String userName, String password) throws IOException, GitExecutionException {
         creditentialsProvider = new UsernamePasswordCredentialsProvider(userName, password);
+        if(repository == null) {
+            repository = new FileRepositoryBuilder()
+                    .setGitDir(new File(localPath + "/.git"))
+                    .build();
+            git = new Git(repository);
+            Config storedConfig = repository.getConfig();
+            Set<String> remotes = storedConfig.getSubsections("remote");
+            remoteUrl = storedConfig.getString("remote", (String)remotes.toArray()[0], "url");;
+        }
         try {
             pull();
         } catch (GitAPIException e) {
@@ -45,10 +56,6 @@ public class GitRepositoryAdapter implements GitRepository {
             throw new GitExecutionException("Exception when executing 'open'. Remote URL: " +
                     remoteUrl + ", local path:" + localPath, e);
         }
-        repository = new FileRepositoryBuilder()
-                .setGitDir(new File(localPath))
-                .build();
-        git = new Git(repository);
     }
 
     @Override

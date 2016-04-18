@@ -9,6 +9,8 @@ import java.util.Map;
 
 @Component("GitRepositoryStore")
 public class GitRepositoryStore implements Serializable {
+    public static final String GIT_REPOS_BASE_FOLDER = "gitRepos/";
+    public static final String GIT_FOLDER = "/.git";
     static private Map<String, GitRepositoryAdapter> gitRepositories = new HashMap<>();
     static private GitRepositoryAdapter activeRepository;
 
@@ -48,9 +50,14 @@ public class GitRepositoryStore implements Serializable {
     private void createAndOpenRepository(String remoteRepositoryUrl, String userName, String password) throws URISyntaxException, GitExecutionException, IOException {
         GitRepositoryAdapter gitRepositoryAdapter;
         String repoName = getRepoNameFromURL(remoteRepositoryUrl);
-        gitRepositoryAdapter = new GitRepositoryAdapter("gitRepos/" + repoName , userName, password);
+        String localPath = GIT_REPOS_BASE_FOLDER + repoName;
+        gitRepositoryAdapter = new GitRepositoryAdapter(localPath, userName, password);
         try {
-            gitRepositoryAdapter.clone(remoteRepositoryUrl);
+            if(new File(localPath + GIT_FOLDER).exists()) {
+                gitRepositoryAdapter.open(userName, password);
+            } else {
+                gitRepositoryAdapter.clone(remoteRepositoryUrl);
+            }
             gitRepositories.put(repoName, gitRepositoryAdapter);
             activeRepository = gitRepositoryAdapter;
         } catch (GitExecutionException e) {
