@@ -2,18 +2,19 @@ package com.automation.server.controller;
 
 import com.automation.server.feature.FeatureFile;
 import com.automation.server.feature.FeatureFileRepository;
+import com.automation.server.feature.Scenario;
 import com.automation.server.repository.GitRepositoryStore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.data.rest.webmvc.BasePathAwareController;
 import org.springframework.hateoas.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -76,6 +77,25 @@ public class FeatureController implements ResourceProcessor<Resource<FeatureFile
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/searchScenario", method = RequestMethod.GET)
+    public ResponseEntity<Resources<ExtendedScenario>> searchForScenario(
+            @RequestParam String scenarioTitle) throws IOException {
+
+        ifNoFilesLoadThem();
+
+        List<ExtendedScenario> scenarios = new ArrayList<>();
+        for(FeatureFile file : featureFileRepository.getFiles().values()) {
+            for(Scenario scenario : file.getScenarios()) {
+                if(scenario.getTitle().contains(scenarioTitle)) {
+                    scenarios.add(new ExtendedScenario(scenario, file.getFileName()));
+                }
+            }
+        }
+
+        Resources<ExtendedScenario> resource = new Resources<>(scenarios);
+        return new ResponseEntity<>(resource, HttpStatus.OK);
+    }
+
     @Override
     public Resource<FeatureFile> toResource(FeatureFile entity) {
         return new Resource<>(entity);
@@ -88,6 +108,16 @@ public class FeatureController implements ResourceProcessor<Resource<FeatureFile
         resource.add(linkTo(FeatureController.class).slash("reloadFiles").withSelfRel());
         resource.add(linkTo(FeatureController.class).slash(resource.getContent().getFileName()).slash("scenarios").withSelfRel());
         return resource;
+    }
+
+    public class ExtendedScenario {
+        public Scenario scenario;
+        public String fileName;
+
+        public ExtendedScenario(Scenario scenario, String fileName) {
+            this.scenario = scenario;
+            this.fileName = fileName;
+        }
     }
 
 }
