@@ -44,8 +44,10 @@ public class FileUpdater {
     }
 
     private void writeLines(List<String> lines, BufferedWriter writer) throws IOException {
-        for (String line : lines) {
-            writeLine(line, writer);
+        if(lines != null) {
+            for (String line : lines) {
+                writeLine(line, writer);
+            }
         }
     }
 

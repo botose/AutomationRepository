@@ -71,7 +71,7 @@ public class GitRepositoryStore implements Serializable {
 
     public String getRepoNameFromURL(String remoteRepositoryUrl) {
         String[] splittedUrl = remoteRepositoryUrl.split("/");
-        return splittedUrl[splittedUrl.length-1];
+        return splittedUrl[splittedUrl.length-1].replace(".git", "");
     }
 
     private void writeObject(ObjectOutputStream stream) throws IOException {

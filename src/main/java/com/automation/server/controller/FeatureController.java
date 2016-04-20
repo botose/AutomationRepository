@@ -5,7 +5,6 @@ import com.automation.server.feature.FeatureFileRepository;
 import com.automation.server.feature.Scenario;
 import com.automation.server.repository.GitRepositoryStore;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.data.rest.webmvc.BasePathAwareController;
 import org.springframework.hateoas.*;
 import org.springframework.http.HttpStatus;
